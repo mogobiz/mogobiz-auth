@@ -4,7 +4,7 @@ package com.mogobiz.auth
 import com.typesafe.config.ConfigFactory
 
 object Settings {
-  private val config = ConfigFactory.load("auth")
+  private val config = ConfigFactory.load("auth").withFallback(ConfigFactory.load("default-auth"))
 
   object Twitter {
     val Callback = config.getString("oauth.twitter.callback")

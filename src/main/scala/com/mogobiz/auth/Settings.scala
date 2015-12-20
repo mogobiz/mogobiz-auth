@@ -4,7 +4,6 @@
 
 package com.mogobiz.auth
 
-
 import com.typesafe.config.ConfigFactory
 
 object Settings {

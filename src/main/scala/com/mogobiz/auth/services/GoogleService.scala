@@ -76,12 +76,10 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
             complete {
               response.getBody
             }
-          }
-          else {
+          } else {
             complete(int2StatusCode(response.getCode))
           }
-        }
-        else {
+        } else {
           complete(StatusCodes.Unauthorized)
         }
       }

@@ -9,7 +9,7 @@ import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TwitterApi
-import org.scribe.model.{OAuthRequest, Token, Verb, Verifier}
+import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
 import spray.http.StatusCode._
 import spray.http.StatusCodes
 import spray.routing.Directives
@@ -70,12 +70,10 @@ class TwitterService(implicit executionContext: ExecutionContext) extends Direct
                 complete {
                   response.getBody
                 }
-              }
-              else {
+              } else {
                 complete(int2StatusCode(response.getCode))
               }
-            }
-            else {
+            } else {
               complete(StatusCodes.Unauthorized)
             }
           }

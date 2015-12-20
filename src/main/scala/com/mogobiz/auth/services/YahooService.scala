@@ -9,7 +9,7 @@ import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.YahooApi
-import org.scribe.model.{OAuthRequest, Token, Verb, Verifier}
+import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
 import spray.http.StatusCode._
 import spray.http.StatusCodes
 import spray.routing.Directives
@@ -68,12 +68,10 @@ class YahooService(implicit executionContext: ExecutionContext) extends Directiv
                 complete {
                   response.getBody
                 }
-              }
-              else {
+              } else {
                 complete(int2StatusCode(response.getCode))
               }
-            }
-            else {
+            } else {
               complete(StatusCodes.Unauthorized)
             }
           }

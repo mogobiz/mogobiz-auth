@@ -9,7 +9,7 @@ import com.mogobiz.auth.api.Github2Api
 import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
-import org.scribe.model.{OAuthRequest, Verb, Verifier}
+import org.scribe.model.{ OAuthRequest, Verb, Verifier }
 import spray.http.StatusCode._
 import spray.http.StatusCodes
 import spray.routing.Directives
@@ -25,7 +25,6 @@ class GithubService(implicit executionContext: ExecutionContext) extends Directi
       signin ~ callback
     }
   }
-
 
   def buildService() = new ServiceBuilder()
     .provider(classOf[Github2Api])
@@ -62,12 +61,10 @@ class GithubService(implicit executionContext: ExecutionContext) extends Directi
                 complete {
                   response.getBody
                 }
-              }
-              else {
+              } else {
                 complete(int2StatusCode(response.getCode))
               }
-            }
-            else {
+            } else {
               complete(StatusCodes.Unauthorized)
             }
           }

@@ -9,7 +9,7 @@ import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.LinkedInApi
-import org.scribe.model.{OAuthRequest, Token, Verb, Verifier}
+import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
 import spray.http.StatusCodes
 import spray.routing.Directives
 
@@ -67,12 +67,10 @@ class LinkedInService(implicit executionContext: ExecutionContext) extends Direc
                 complete {
                   response.getBody
                 }
-              }
-              else {
+              } else {
                 complete(int2StatusCode(response.getCode))
               }
-            }
-            else {
+            } else {
               complete(StatusCodes.Unauthorized)
             }
           }

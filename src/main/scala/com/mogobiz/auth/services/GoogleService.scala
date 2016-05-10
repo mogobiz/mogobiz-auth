@@ -62,25 +62,21 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
 
   lazy val callback = path("callback") {
     get {
-      parameters('code.?) { code =>
-        if (code.isDefined) {
-          val service = buildService()
-          val verifier = new Verifier(code.get)
-          val accessToken = getAccessToken(null, verifier)
-          println(accessToken.getRawResponse)
-          val ResourceUrl = Settings.Google.ResourceUrl
-          val request = new OAuthRequest(Verb.GET, ResourceUrl)
-          service.signRequest(accessToken, request)
-          val response = request.send()
-          if (response.getCode == StatusCodes.OK.intValue) {
-            complete {
-              response.getBody
-            }
-          } else {
-            complete(int2StatusCode(response.getCode))
+      parameters('code) { code =>
+        val service = buildService()
+        val verifier = new Verifier(code)
+        val accessToken = getAccessToken(null, verifier)
+        println(accessToken.getRawResponse)
+        val ResourceUrl = Settings.Google.ResourceUrl
+        val request = new OAuthRequest(Verb.GET, ResourceUrl)
+        service.signRequest(accessToken, request)
+        val response = request.send()
+        if (response.getCode == StatusCodes.OK.intValue) {
+          complete {
+            response.getBody
           }
         } else {
-          complete(StatusCodes.Unauthorized)
+          complete(int2StatusCode(response.getCode))
         }
       }
     }

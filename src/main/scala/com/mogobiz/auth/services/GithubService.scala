@@ -48,24 +48,20 @@ class GithubService(implicit executionContext: ExecutionContext) extends Directi
     get {
       session {
         session =>
-          parameters('code.?) { code =>
-            if (code.isDefined) {
-              val service = buildService()
-              val verifier = new Verifier(code.get)
-              val accessToken = service.getAccessToken(null, verifier)
-              val ResourceUrl = Settings.Github.ResourceUrl
-              val request = new OAuthRequest(Verb.GET, ResourceUrl)
-              service.signRequest(accessToken, request)
-              val response = request.send()
-              if (response.getCode == StatusCodes.OK.intValue) {
-                complete {
-                  response.getBody
-                }
-              } else {
-                complete(int2StatusCode(response.getCode))
+          parameters('code) { code =>
+            val service = buildService()
+            val verifier = new Verifier(code)
+            val accessToken = service.getAccessToken(null, verifier)
+            val ResourceUrl = Settings.Github.ResourceUrl
+            val request = new OAuthRequest(Verb.GET, ResourceUrl)
+            service.signRequest(accessToken, request)
+            val response = request.send()
+            if (response.getCode == StatusCodes.OK.intValue) {
+              complete {
+                response.getBody
               }
             } else {
-              complete(StatusCodes.Unauthorized)
+              complete(int2StatusCode(response.getCode))
             }
           }
       }

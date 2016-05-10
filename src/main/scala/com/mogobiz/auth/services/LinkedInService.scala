@@ -52,26 +52,22 @@ class LinkedInService(implicit executionContext: ExecutionContext) extends Direc
         session =>
           val token = session("oauthToken").toString
           val secret = session("oauthSecret").toString
-          parameters('oauth_verifier.?, 'oauth_token.?) { (oauth_verifier, oauth_token) =>
-            if (oauth_verifier.isDefined) {
-              val service = buildService()
-              val verifier = new Verifier(oauth_verifier.get)
-              val requestToken = new Token(token, secret)
-              val accessToken = service.getAccessToken(requestToken, verifier)
-              println(accessToken.getRawResponse)
-              val ResourceUrl = Settings.LinkedIn.ResourceUrl
-              val request = new OAuthRequest(Verb.GET, ResourceUrl)
-              service.signRequest(accessToken, request)
-              val response = request.send()
-              if (response.getCode == StatusCodes.OK.intValue) {
-                complete {
-                  response.getBody
-                }
-              } else {
-                complete(int2StatusCode(response.getCode))
+          parameters('oauth_verifier, 'oauth_token.?) { (oauth_verifier, oauth_token) =>
+            val service = buildService()
+            val verifier = new Verifier(oauth_verifier)
+            val requestToken = new Token(token, secret)
+            val accessToken = service.getAccessToken(requestToken, verifier)
+            println(accessToken.getRawResponse)
+            val ResourceUrl = Settings.LinkedIn.ResourceUrl
+            val request = new OAuthRequest(Verb.GET, ResourceUrl)
+            service.signRequest(accessToken, request)
+            val response = request.send()
+            if (response.getCode == StatusCodes.OK.intValue) {
+              complete {
+                response.getBody
               }
             } else {
-              complete(StatusCodes.Unauthorized)
+              complete(int2StatusCode(response.getCode))
             }
           }
       }

@@ -7,7 +7,7 @@ package com.mogobiz.auth.services
 import akka.util.Timeout
 import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.StrictLogging
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.LinkedInApi
 import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import spray.http.StatusCode._
 
-class LinkedInService(implicit executionContext: ExecutionContext) extends Directives with LazyLogging {
+class LinkedInService(implicit executionContext: ExecutionContext) extends Directives with StrictLogging {
   implicit val timeout = Timeout(10.seconds)
 
   val route = pathPrefix("oauth") {

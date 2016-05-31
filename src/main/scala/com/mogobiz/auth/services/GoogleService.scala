@@ -8,7 +8,7 @@ import akka.util.Timeout
 import com.mogobiz.auth.api.Google2Api
 import com.mogobiz.json.JacksonConverter
 import com.mogobiz.auth.Settings
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.StrictLogging
 import org.scribe.builder.ServiceBuilder
 import org.scribe.exceptions.OAuthException
 import org.scribe.model._
@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import spray.http.StatusCode._
 
-class GoogleService(implicit executionContext: ExecutionContext) extends Directives with LazyLogging {
+class GoogleService(implicit executionContext: ExecutionContext) extends Directives with StrictLogging {
   implicit val timeout = Timeout(10.seconds)
 
   val route = pathPrefix("oauth") {

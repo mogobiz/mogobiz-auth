@@ -4,19 +4,17 @@
 
 package com.mogobiz.auth.services
 
+import akka.http.scaladsl.model.{ StatusCode, StatusCodes }
+import akka.http.scaladsl.server.Directives
 import akka.util.Timeout
 import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.FacebookApi
 import org.scribe.model.{ OAuthRequest, Verb, Verifier }
-import spray.http.StatusCode._
-import spray.http.StatusCodes
-import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-
 class FacebookService(implicit executionContext: ExecutionContext) extends Directives {
   implicit val timeout = Timeout(10.seconds)
 
@@ -58,7 +56,7 @@ class FacebookService(implicit executionContext: ExecutionContext) extends Direc
                 response.getBody
               }
             } else {
-              complete(int2StatusCode(response.getCode))
+              complete(StatusCode.int2StatusCode(response.getCode))
             }
           }
       }

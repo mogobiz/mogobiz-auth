@@ -4,15 +4,14 @@
 
 package com.mogobiz.auth.services
 
+import akka.http.scaladsl.model.{ StatusCode, StatusCodes }
+import akka.http.scaladsl.server.Directives
 import akka.util.Timeout
 import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TwitterApi
 import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
-import spray.http.StatusCode._
-import spray.http.StatusCodes
-import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -70,7 +69,7 @@ class TwitterService(implicit executionContext: ExecutionContext) extends Direct
                 response.getBody
               }
             } else {
-              complete(int2StatusCode(response.getCode))
+              complete(StatusCode.int2StatusCode(response.getCode))
             }
           }
       }

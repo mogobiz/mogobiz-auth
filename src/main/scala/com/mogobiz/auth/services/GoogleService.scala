@@ -4,20 +4,18 @@
 
 package com.mogobiz.auth.services
 
+import akka.http.scaladsl.model.{ StatusCode, StatusCodes }
+import akka.http.scaladsl.server.Directives
 import akka.util.Timeout
-import com.mogobiz.auth.api.Google2Api
-import com.mogobiz.json.JacksonConverter
 import com.mogobiz.auth.Settings
+import com.mogobiz.auth.api.Google2Api
 import com.typesafe.scalalogging.StrictLogging
 import org.scribe.builder.ServiceBuilder
 import org.scribe.exceptions.OAuthException
 import org.scribe.model._
-import spray.http.StatusCodes
-import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import spray.http.StatusCode._
 
 class GoogleService(implicit executionContext: ExecutionContext) extends Directives with StrictLogging {
   implicit val timeout = Timeout(10.seconds)
@@ -39,6 +37,7 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
   val api = new Google2Api()
 
   def getAccessToken(requestToken: Token, verifier: Verifier): Token = {
+    import com.mogobiz.json.Implicits._
     val request = new OAuthRequest(Verb.POST, api.getAccessTokenEndpoint())
     request.addBodyParameter(OAuthConstants.CLIENT_ID, Settings.Google.ConsumerKey)
     request.addBodyParameter(OAuthConstants.CLIENT_SECRET, Settings.Google.ConsumerSecret)
@@ -48,7 +47,7 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
     request.addBodyParameter(OAuthConstants.SCOPE, Settings.Google.Scope)
     logger.debug(request.getBodyContents)
     val response = request.send()
-    val accessData = JacksonConverter.deserialize[Map[String, String]](response.getBody)
+    val accessData = serialization.read[Map[String, String]](response.getBody)
     val accessToken = accessData.get("access_token")
     new Token(accessToken.getOrElse(throw new OAuthException("Cannot extract an access token. Response was: " + response.getBody)), "", response.getBody)
   }
@@ -77,7 +76,7 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
             response.getBody
           }
         } else {
-          complete(int2StatusCode(response.getCode))
+          complete(StatusCode.int2StatusCode(response.getCode))
         }
       }
     }

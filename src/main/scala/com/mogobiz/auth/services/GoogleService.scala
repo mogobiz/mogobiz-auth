@@ -28,13 +28,14 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
     }
   }
 
-  def buildService() = new ServiceBuilder()
-    .provider(classOf[Google2Api])
-    .apiKey(Settings.Google.ConsumerKey)
-    .apiSecret(Settings.Google.ConsumerSecret)
-    .callback(Settings.Google.Callback)
-    .scope(Settings.Google.Scope)
-    .build()
+  def buildService() =
+    new ServiceBuilder()
+      .provider(classOf[Google2Api])
+      .apiKey(Settings.Google.ConsumerKey)
+      .apiSecret(Settings.Google.ConsumerSecret)
+      .callback(Settings.Google.Callback)
+      .scope(Settings.Google.Scope)
+      .build()
 
   val api = new Google2Api()
 
@@ -47,10 +48,13 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
     request.addBodyParameter("grant_type", "authorization_code")
     request.addBodyParameter(OAuthConstants.SCOPE, Settings.Google.Scope)
     logger.debug(request.getBodyContents)
-    val response = request.send()
-    val accessData = JacksonConverter.deserialize[Map[String, String]](response.getBody)
+    val response    = request.send()
+    val accessData  = JacksonConverter.deserialize[Map[String, String]](response.getBody)
     val accessToken = accessData.get("access_token")
-    new Token(accessToken.getOrElse(throw new OAuthException("Cannot extract an access token. Response was: " + response.getBody)), "", response.getBody)
+    new Token(accessToken.getOrElse(
+                  throw new OAuthException("Cannot extract an access token. Response was: " + response.getBody)),
+              "",
+              response.getBody)
   }
 
   lazy val signin = path("signin") {
@@ -64,12 +68,12 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
   lazy val callback = path("callback") {
     get {
       parameters('code) { code =>
-        val service = buildService()
-        val verifier = new Verifier(code)
+        val service     = buildService()
+        val verifier    = new Verifier(code)
         val accessToken = getAccessToken(null, verifier)
         logger.debug(accessToken.getRawResponse)
         val ResourceUrl = Settings.Google.ResourceUrl
-        val request = new OAuthRequest(Verb.GET, ResourceUrl)
+        val request     = new OAuthRequest(Verb.GET, ResourceUrl)
         service.signRequest(accessToken, request)
         val response = request.send()
         if (response.getCode == StatusCodes.OK.intValue) {

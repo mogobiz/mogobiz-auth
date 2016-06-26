@@ -9,7 +9,7 @@ import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.YahooApi
-import org.scribe.model.{ OAuthRequest, Token, Verb, Verifier }
+import org.scribe.model.{OAuthRequest, Token, Verb, Verifier}
 import spray.http.StatusCode._
 import spray.http.StatusCodes
 import spray.routing.Directives
@@ -27,20 +27,21 @@ class YahooService(implicit executionContext: ExecutionContext) extends Directiv
     }
   }
 
-  def buildService() = new ServiceBuilder()
-    .provider(classOf[YahooApi])
-    .apiKey(Settings.Yahoo.ConsumerKey)
-    .apiSecret(Settings.Yahoo.ConsumerSecret)
-    .callback(Settings.Yahoo.Callback)
-    .debug()
-    .build()
+  def buildService() =
+    new ServiceBuilder()
+      .provider(classOf[YahooApi])
+      .apiKey(Settings.Yahoo.ConsumerKey)
+      .apiSecret(Settings.Yahoo.ConsumerSecret)
+      .callback(Settings.Yahoo.Callback)
+      .debug()
+      .build()
 
   lazy val signin = get {
     path("signin") {
       session { session =>
-        val service = buildService()
+        val service      = buildService()
         val requestToken = service.getRequestToken()
-        val authURL = service.getAuthorizationUrl(requestToken)
+        val authURL      = service.getAuthorizationUrl(requestToken)
         setSession(session += "oauthToken" -> requestToken.getToken += "oauthSecret" -> requestToken.getSecret) {
           redirect(authURL, StatusCodes.TemporaryRedirect)
         }
@@ -50,27 +51,26 @@ class YahooService(implicit executionContext: ExecutionContext) extends Directiv
 
   lazy val callback = get {
     path("callback") {
-      session {
-        session =>
-          val token = session("oauthToken").toString
-          val secret = session("oauthSecret").toString
-          parameters('oauth_verifier, 'oauth_token.?) { (oauth_verifier, oauth_token) =>
-            val service = buildService()
-            val verifier = new Verifier(oauth_verifier)
-            val requestToken = new Token(token, secret)
-            val accessToken = service.getAccessToken(requestToken, verifier)
-            val ResourceUrl = Settings.Yahoo.ResourceUrl
-            val request = new OAuthRequest(Verb.GET, ResourceUrl)
-            service.signRequest(accessToken, request)
-            val response = request.send()
-            if (response.getCode == StatusCodes.OK.intValue) {
-              complete {
-                response.getBody
-              }
-            } else {
-              complete(int2StatusCode(response.getCode))
+      session { session =>
+        val token  = session("oauthToken").toString
+        val secret = session("oauthSecret").toString
+        parameters('oauth_verifier, 'oauth_token.?) { (oauth_verifier, oauth_token) =>
+          val service      = buildService()
+          val verifier     = new Verifier(oauth_verifier)
+          val requestToken = new Token(token, secret)
+          val accessToken  = service.getAccessToken(requestToken, verifier)
+          val ResourceUrl  = Settings.Yahoo.ResourceUrl
+          val request      = new OAuthRequest(Verb.GET, ResourceUrl)
+          service.signRequest(accessToken, request)
+          val response = request.send()
+          if (response.getCode == StatusCodes.OK.intValue) {
+            complete {
+              response.getBody
             }
+          } else {
+            complete(int2StatusCode(response.getCode))
           }
+        }
       }
     }
   }

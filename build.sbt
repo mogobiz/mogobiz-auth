@@ -2,4 +2,3 @@
 
 name := "mogobiz-auth"
 
-scalariformSettings

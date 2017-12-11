@@ -9,12 +9,12 @@ import org.scribe.model.OAuthConfig
 import org.scribe.utils.{OAuthEncoder, Preconditions}
 
 class Github2Api extends DefaultApi20 {
-  val AUTHORIZE_URL        = "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s"
-  val SCOPED_AUTHORIZE_URL = AUTHORIZE_URL + "&scope=%s"
+  val AUTHORIZE_URL: String        = "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s"
+  val SCOPED_AUTHORIZE_URL: String = AUTHORIZE_URL + "&scope=%s"
 
-  override def getAccessTokenEndpoint() = "https://github.com/login/oauth/access_token"
+  override def getAccessTokenEndpoint(): String = "https://github.com/login/oauth/access_token"
 
-  override def getAuthorizationUrl(config: OAuthConfig) = {
+  override def getAuthorizationUrl(config: OAuthConfig): String = {
     Preconditions
       .checkValidUrl(config.getCallback(), "Must provide a valid url as callback. Github does not support OOB");
     // Append scope if present

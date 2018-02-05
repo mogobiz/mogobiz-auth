@@ -4,22 +4,23 @@
 
 package com.mogobiz.auth.services
 
+import akka.http.scaladsl.model.{StatusCode, StatusCodes}
+import akka.http.scaladsl.server.Directives
 import akka.util.Timeout
+import com.mogobiz.auth.Settings
 import com.mogobiz.auth.api.Google2Api
 import com.mogobiz.json.JacksonConverter
-import com.mogobiz.auth.Settings
 import com.typesafe.scalalogging.StrictLogging
 import org.scribe.builder.ServiceBuilder
 import org.scribe.exceptions.OAuthException
 import org.scribe.model._
-import spray.http.StatusCodes
-import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import spray.http.StatusCode._
 
-class GoogleService(implicit executionContext: ExecutionContext) extends Directives with StrictLogging {
+class GoogleService(implicit executionContext: ExecutionContext)
+    extends Directives
+    with StrictLogging {
   implicit val timeout = Timeout(10.seconds)
 
   val route = pathPrefix("oauth") {
@@ -41,20 +42,26 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
 
   def getAccessToken(requestToken: Token, verifier: Verifier): Token = {
     val request = new OAuthRequest(Verb.POST, api.getAccessTokenEndpoint())
-    request.addBodyParameter(OAuthConstants.CLIENT_ID, Settings.Google.ConsumerKey)
-    request.addBodyParameter(OAuthConstants.CLIENT_SECRET, Settings.Google.ConsumerSecret)
+    request.addBodyParameter(OAuthConstants.CLIENT_ID,
+                             Settings.Google.ConsumerKey)
+    request.addBodyParameter(OAuthConstants.CLIENT_SECRET,
+                             Settings.Google.ConsumerSecret)
     request.addBodyParameter(OAuthConstants.CODE, verifier.getValue())
-    request.addBodyParameter(OAuthConstants.REDIRECT_URI, Settings.Google.Callback)
+    request.addBodyParameter(OAuthConstants.REDIRECT_URI,
+                             Settings.Google.Callback)
     request.addBodyParameter("grant_type", "authorization_code")
     request.addBodyParameter(OAuthConstants.SCOPE, Settings.Google.Scope)
     logger.debug(request.getBodyContents)
-    val response    = request.send()
-    val accessData  = JacksonConverter.deserialize[Map[String, String]](response.getBody)
+    val response = request.send()
+    val accessData =
+      JacksonConverter.deserialize[Map[String, String]](response.getBody)
     val accessToken = accessData.get("access_token")
-    new Token(accessToken.getOrElse(
-                  throw new OAuthException("Cannot extract an access token. Response was: " + response.getBody)),
-              "",
-              response.getBody)
+    new Token(
+      accessToken.getOrElse(
+        throw new OAuthException(
+          "Cannot extract an access token. Response was: " + response.getBody)),
+      "",
+      response.getBody)
   }
 
   lazy val signin = path("signin") {
@@ -68,12 +75,12 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
   lazy val callback = path("callback") {
     get {
       parameters('code) { code =>
-        val service     = buildService()
-        val verifier    = new Verifier(code)
+        val service = buildService()
+        val verifier = new Verifier(code)
         val accessToken = getAccessToken(null, verifier)
         logger.debug(accessToken.getRawResponse)
         val ResourceUrl = Settings.Google.ResourceUrl
-        val request     = new OAuthRequest(Verb.GET, ResourceUrl)
+        val request = new OAuthRequest(Verb.GET, ResourceUrl)
         service.signRequest(accessToken, request)
         val response = request.send()
         if (response.getCode == StatusCodes.OK.intValue) {
@@ -81,7 +88,7 @@ class GoogleService(implicit executionContext: ExecutionContext) extends Directi
             response.getBody
           }
         } else {
-          complete(int2StatusCode(response.getCode))
+          complete(StatusCode.int2StatusCode(response.getCode))
         }
       }
     }

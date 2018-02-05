@@ -4,20 +4,20 @@
 
 package com.mogobiz.auth.services
 
+import akka.http.scaladsl.model.{StatusCode, StatusCodes}
+import akka.http.scaladsl.server.Directives
 import akka.util.Timeout
 import com.mogobiz.auth.api.Github2Api
 import com.mogobiz.auth.Settings
 import com.mogobiz.session.SessionESDirectives._
 import org.scribe.builder.ServiceBuilder
 import org.scribe.model.{OAuthRequest, Verb, Verifier}
-import spray.http.StatusCode._
-import spray.http.StatusCodes
-import spray.routing.Directives
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class GithubService(implicit executionContext: ExecutionContext) extends Directives {
+class GithubService(implicit executionContext: ExecutionContext)
+    extends Directives {
   implicit val timeout = Timeout(10.seconds)
 
   val route = pathPrefix("oauth") {
@@ -49,11 +49,11 @@ class GithubService(implicit executionContext: ExecutionContext) extends Directi
     get {
       session { session =>
         parameters('code) { code =>
-          val service     = buildService()
-          val verifier    = new Verifier(code)
+          val service = buildService()
+          val verifier = new Verifier(code)
           val accessToken = service.getAccessToken(null, verifier)
           val ResourceUrl = Settings.Github.ResourceUrl
-          val request     = new OAuthRequest(Verb.GET, ResourceUrl)
+          val request = new OAuthRequest(Verb.GET, ResourceUrl)
           service.signRequest(accessToken, request)
           val response = request.send()
           if (response.getCode == StatusCodes.OK.intValue) {
@@ -61,7 +61,7 @@ class GithubService(implicit executionContext: ExecutionContext) extends Directi
               response.getBody
             }
           } else {
-            complete(int2StatusCode(response.getCode))
+            complete(StatusCode.int2StatusCode(response.getCode))
           }
         }
       }
